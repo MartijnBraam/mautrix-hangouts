@@ -19,14 +19,14 @@ package main
 import (
 	"fmt"
 	"html"
+	whatsappExt "mautrix-hangouts/whatsapp-ext"
 	"regexp"
 	"strings"
 
 	"maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/format"
 
-	"maunium.net/go/mautrix-whatsapp/types"
-	"maunium.net/go/mautrix-whatsapp/whatsapp-ext"
+	"mautrix-hangouts/types"
 )
 
 var italicRegex = regexp.MustCompile("([\\s>~*]|^)_(.+?)_([^a-zA-Z\\d]|$)")

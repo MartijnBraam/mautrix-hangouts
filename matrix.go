@@ -25,7 +25,7 @@ import (
 	"maunium.net/go/mautrix-appservice"
 	"maunium.net/go/mautrix/format"
 
-	"maunium.net/go/mautrix-whatsapp/types"
+	"mautrix-hangouts/types"
 )
 
 type MatrixHandler struct {
@@ -89,7 +89,7 @@ func (mx *MatrixHandler) HandleBotInvite(evt *mautrix.Event) {
 	for mxid, _ := range members.Joined {
 		if mxid == intent.UserID || mxid == evt.Sender {
 			continue
-		} else if _, ok := mx.bridge.ParsePuppetMXID(types.MatrixUserID(mxid)); ok {
+		} else if _, ok := mx.bridge.ParsePuppetMXID(types.MatrixUserId(mxid)); ok {
 			hasPuppets = true
 			continue
 		}
@@ -100,8 +100,8 @@ func (mx *MatrixHandler) HandleBotInvite(evt *mautrix.Event) {
 	}
 
 	if !hasPuppets {
-		user := mx.bridge.GetUserByMXID(types.MatrixUserID(evt.Sender))
-		user.SetManagementRoom(types.MatrixRoomID(resp.RoomID))
+		user := mx.bridge.GetUserByMXID(types.MatrixUserId(evt.Sender))
+		user.SetManagementRoom(types.MatrixRoomId(resp.RoomID))
 		intent.SendNotice(string(user.ManagementRoom), "This room has been registered as your bridge management/status room. Send `help` to get a list of commands.")
 		mx.log.Debugln(resp.RoomID, "registered as a management room with", evt.Sender)
 	}
@@ -117,7 +117,7 @@ func (mx *MatrixHandler) HandleMembership(evt *mautrix.Event) {
 		return
 	}
 
-	user := mx.bridge.GetUserByMXID(types.MatrixUserID(evt.Sender))
+	user := mx.bridge.GetUserByMXID(types.MatrixUserId(evt.Sender))
 	if user == nil || !user.Whitelisted || !user.IsLoggedIn() {
 		return
 	}
@@ -134,7 +134,7 @@ func (mx *MatrixHandler) HandleMembership(evt *mautrix.Event) {
 }
 
 func (mx *MatrixHandler) HandleRoomMetadata(evt *mautrix.Event) {
-	user := mx.bridge.GetUserByMXID(types.MatrixUserID(evt.Sender))
+	user := mx.bridge.GetUserByMXID(types.MatrixUserId(evt.Sender))
 	if user == nil || !user.Whitelisted || !user.IsLoggedIn() || !user.Connected {
 		return
 	}
@@ -148,7 +148,7 @@ func (mx *MatrixHandler) HandleRoomMetadata(evt *mautrix.Event) {
 	var err error
 	switch evt.Type {
 	case mautrix.StateRoomName:
-		resp, err = user.Conn.UpdateGroupSubject(evt.Content.Name, portal.Key.JID)
+		return
 	case mautrix.StateRoomAvatar:
 		return
 	case mautrix.StateTopic:
@@ -171,8 +171,8 @@ func (mx *MatrixHandler) HandleMessage(evt *mautrix.Event) {
 		return
 	}
 
-	roomID := types.MatrixRoomID(evt.RoomID)
-	user := mx.bridge.GetUserByMXID(types.MatrixUserID(evt.Sender))
+	roomID := types.MatrixRoomId(evt.RoomID)
+	user := mx.bridge.GetUserByMXID(types.MatrixUserId(evt.Sender))
 
 	if !user.Whitelisted {
 		return
@@ -193,7 +193,7 @@ func (mx *MatrixHandler) HandleMessage(evt *mautrix.Event) {
 	if !user.IsLoggedIn() {
 		return
 	} else if !user.Connected {
-		msg := format.RenderMarkdown(fmt.Sprintf("\u26a0 You are not connected to WhatsApp, so your message was not bridged. " +
+		msg := format.RenderMarkdown(fmt.Sprintf("\u26a0 You are not connected to WhatsApp, so your message was not bridged. "+
 			"Use `%s reconnect` to reconnect.", mx.bridge.Config.Bridge.CommandPrefix))
 		msg.MsgType = mautrix.MsgNotice
 		_, _ = mx.bridge.Bot.SendMessageEvent(roomID, mautrix.EventMessage, msg)
@@ -211,8 +211,8 @@ func (mx *MatrixHandler) HandleRedaction(evt *mautrix.Event) {
 		return
 	}
 
-	roomID := types.MatrixRoomID(evt.RoomID)
-	user := mx.bridge.GetUserByMXID(types.MatrixUserID(evt.Sender))
+	roomID := types.MatrixRoomId(evt.RoomID)
+	user := mx.bridge.GetUserByMXID(types.MatrixUserId(evt.Sender))
 
 	if !user.Whitelisted {
 		return
@@ -221,8 +221,8 @@ func (mx *MatrixHandler) HandleRedaction(evt *mautrix.Event) {
 	if !user.IsLoggedIn() {
 		return
 	} else if !user.Connected {
-		msg := format.RenderMarkdown(fmt.Sprintf("[%[1]s](https://matrix.to/#/%[1]s): \u26a0 " +
-			"You are not connected to WhatsApp, so your redaction was not bridged. " +
+		msg := format.RenderMarkdown(fmt.Sprintf("[%[1]s](https://matrix.to/#/%[1]s): \u26a0 "+
+			"You are not connected to WhatsApp, so your redaction was not bridged. "+
 			"Use `%[2]s reconnect` to reconnect.", user.MXID, mx.bridge.Config.Bridge.CommandPrefix))
 		msg.MsgType = mautrix.MsgNotice
 		_, _ = mx.bridge.Bot.SendMessageEvent(roomID, mautrix.EventMessage, msg)
