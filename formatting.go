@@ -107,7 +107,7 @@ func NewFormatter(bridge *Bridge) *Formatter {
 }
 
 func (formatter *Formatter) getMatrixInfoByJID(jid types.WhatsAppID) (mxid, displayname string) {
-	if user := formatter.bridge.GetUserByJID(jid); user != nil {
+	if user := formatter.bridge.GetUserByHID(jid); user != nil {
 		mxid = user.MXID
 		displayname = user.MXID
 	} else if puppet := formatter.bridge.GetPuppetByJID(jid); puppet != nil {

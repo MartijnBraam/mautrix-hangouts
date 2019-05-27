@@ -83,7 +83,7 @@ func (bridge *Bridge) GetUserByMXID(userID types.MatrixUserId) *User {
 	return user
 }
 
-func (bridge *Bridge) GetUserByJID(userID types.WhatsAppID) *User {
+func (bridge *Bridge) GetUserByHID(userID types.HangoutsId) *User {
 	bridge.usersLock.Lock()
 	defer bridge.usersLock.Unlock()
 	user, ok := bridge.UsersByHID[userID]

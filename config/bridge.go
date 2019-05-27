@@ -22,8 +22,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/Rhymen/go-whatsapp"
-
 	"maunium.net/go/mautrix-appservice"
 
 	"mautrix-hangouts/types"

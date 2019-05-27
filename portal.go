@@ -281,7 +281,7 @@ func (portal *Portal) SyncParticipants(metadata *whatsappExt.GroupInfo) {
 		changed = true
 	}
 	for _, participant := range metadata.Participants {
-		user := portal.bridge.GetUserByJID(participant.JID)
+		user := portal.bridge.GetUserByHID(participant.JID)
 		if user != nil && !portal.bridge.AS.StateStore.IsInvited(portal.MXID, user.MXID) {
 			_, err = portal.MainIntent().InviteUser(portal.MXID, &mautrix.ReqInviteUser{
 				UserID: user.MXID,
@@ -487,7 +487,7 @@ func (portal *Portal) ChangeAdminStatus(jids []string, setAdmin bool) {
 		puppet := portal.bridge.GetPuppetByJID(jid)
 		changed = levels.EnsureUserLevel(puppet.MXID, newLevel) || changed
 
-		user := portal.bridge.GetUserByJID(jid)
+		user := portal.bridge.GetUserByHID(jid)
 		if user != nil {
 			changed = levels.EnsureUserLevel(user.MXID, newLevel) || changed
 		}
