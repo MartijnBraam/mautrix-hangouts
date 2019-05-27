@@ -22,14 +22,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/Rhymen/go-whatsapp"
-
 	log "maunium.net/go/maulogger/v2"
 	"maunium.net/go/mautrix-appservice"
 
-	"maunium.net/go/mautrix-whatsapp/database"
-	"maunium.net/go/mautrix-whatsapp/types"
-	"maunium.net/go/mautrix-whatsapp/whatsapp-ext"
+	"mautrix-hangouts/database"
+	"mautrix-hangouts/types"
 )
 
 func (bridge *Bridge) ParsePuppetMXID(mxid types.MatrixUserID) (types.WhatsAppID, bool) {
@@ -111,7 +108,7 @@ func (bridge *Bridge) dbPuppetsToPuppets(dbPuppets []*database.Puppet) []*Puppet
 		if !ok {
 			puppet = bridge.NewPuppet(dbPuppet)
 			bridge.puppets[dbPuppet.JID] = puppet
-			if len(dbPuppet.CustomMXID) > 0  {
+			if len(dbPuppet.CustomMXID) > 0 {
 				bridge.puppetsByCustomMXID[dbPuppet.CustomMXID] = puppet
 			}
 		}
@@ -154,7 +151,7 @@ func (puppet *Puppet) PhoneNumber() string {
 }
 
 func (puppet *Puppet) IntentFor(portal *Portal) *appservice.IntentAPI {
-	if puppet.customIntent == nil || portal.Key.JID == puppet.JID{
+	if puppet.customIntent == nil || portal.Key.JID == puppet.JID {
 		return puppet.DefaultIntent()
 	}
 	return puppet.customIntent

@@ -27,12 +27,13 @@ import (
 	log "maunium.net/go/maulogger/v2"
 	"maunium.net/go/mautrix-appservice"
 
-	"maunium.net/go/mautrix-whatsapp/config"
-	"maunium.net/go/mautrix-whatsapp/database"
-	"maunium.net/go/mautrix-whatsapp/types"
+	"mautrix-hangouts/config"
+	"mautrix-hangouts/database"
+	"mautrix-hangouts/types"
 )
 
 var configPath = flag.MakeFull("c", "config", "The path to your config file.", "config.yaml").String()
+
 //var baseConfigPath = flag.MakeFull("b", "base-config", "The path to the example config file.", "example-config.yaml").String()
 var registrationPath = flag.MakeFull("r", "registration", "The path where to save the appservice registration.", "registration.yaml").String()
 var generateRegistration = flag.MakeFull("g", "generate-registration", "Generate registration and quit.", "false").Bool()
@@ -71,28 +72,28 @@ type Bridge struct {
 	Bot            *appservice.IntentAPI
 	Formatter      *Formatter
 
-	usersByMXID         map[types.MatrixUserID]*User
-	usersByJID          map[types.WhatsAppID]*User
+	usersByMXID         map[types.MatrixUserId]*User
+	UsersByHID          map[types.HangoutsId]*User
 	usersLock           sync.Mutex
-	managementRooms     map[types.MatrixRoomID]*User
+	managementRooms     map[types.MatrixRoomId]*User
 	managementRoomsLock sync.Mutex
-	portalsByMXID       map[types.MatrixRoomID]*Portal
-	portalsByJID        map[database.PortalKey]*Portal
+	portalsByMXID       map[types.MatrixRoomId]*Portal
+	portalsByHID        map[database.PortalKey]*Portal
 	portalsLock         sync.Mutex
-	puppets             map[types.WhatsAppID]*Puppet
-	puppetsByCustomMXID map[types.MatrixUserID]*Puppet
+	puppets             map[types.HangoutsId]*Puppet
+	puppetsByCustomMXID map[types.MatrixUserId]*Puppet
 	puppetsLock         sync.Mutex
 }
 
 func NewBridge() *Bridge {
 	bridge := &Bridge{
-		usersByMXID:         make(map[types.MatrixUserID]*User),
-		usersByJID:          make(map[types.WhatsAppID]*User),
-		managementRooms:     make(map[types.MatrixRoomID]*User),
-		portalsByMXID:       make(map[types.MatrixRoomID]*Portal),
-		portalsByJID:        make(map[database.PortalKey]*Portal),
-		puppets:             make(map[types.WhatsAppID]*Puppet),
-		puppetsByCustomMXID: make(map[types.MatrixUserID]*Puppet),
+		usersByMXID:         make(map[types.MatrixUserId]*User),
+		UsersByHID:          make(map[types.HangoutsId]*User),
+		managementRooms:     make(map[types.MatrixRoomId]*User),
+		portalsByMXID:       make(map[types.MatrixRoomId]*Portal),
+		portalsByHID:        make(map[database.PortalKey]*Portal),
+		puppets:             make(map[types.HangoutsId]*Puppet),
+		puppetsByCustomMXID: make(map[types.MatrixUserId]*Puppet),
 	}
 
 	var err error
@@ -209,7 +210,7 @@ func (bridge *Bridge) StartUsers() {
 func (bridge *Bridge) Stop() {
 	bridge.AS.Stop()
 	bridge.EventProcessor.Stop()
-	for _, user := range bridge.usersByJID {
+	for _, user := range bridge.UsersByHID {
 		if user.Conn == nil {
 			continue
 		}

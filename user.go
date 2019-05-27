@@ -19,13 +19,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	whatsappExt "mautrix-hangouts/whatsapp-ext"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/skip2/go-qrcode"
 	log "maunium.net/go/maulogger/v2"
 
 	"maunium.net/go/mautrix"
@@ -34,9 +34,9 @@ import (
 	"github.com/Rhymen/go-whatsapp"
 	waProto "github.com/Rhymen/go-whatsapp/binary/proto"
 
-	"maunium.net/go/mautrix-whatsapp/database"
-	"maunium.net/go/mautrix-whatsapp/types"
 	"maunium.net/go/mautrix-whatsapp/whatsapp-ext"
+	"mautrix-hangouts/database"
+	"mautrix-hangouts/types"
 )
 
 type User struct {
@@ -56,7 +56,7 @@ type User struct {
 	syncLock sync.Mutex
 }
 
-func (bridge *Bridge) GetUserByMXID(userID types.MatrixUserID) *User {
+func (bridge *Bridge) GetUserByMXID(userID types.MatrixUserId) *User {
 	_, isPuppet := bridge.ParsePuppetMXID(userID)
 	if isPuppet || userID == bridge.Bot.UserID {
 		return nil
@@ -74,7 +74,7 @@ func (bridge *Bridge) GetUserByMXID(userID types.MatrixUserID) *User {
 		user = bridge.NewUser(dbUser)
 		bridge.usersByMXID[user.MXID] = user
 		if len(user.JID) > 0 {
-			bridge.usersByJID[user.JID] = user
+			bridge.UsersByHID[user.JID] = user
 		}
 		if len(user.ManagementRoom) > 0 {
 			bridge.managementRooms[user.ManagementRoom] = user
@@ -86,7 +86,7 @@ func (bridge *Bridge) GetUserByMXID(userID types.MatrixUserID) *User {
 func (bridge *Bridge) GetUserByJID(userID types.WhatsAppID) *User {
 	bridge.usersLock.Lock()
 	defer bridge.usersLock.Unlock()
-	user, ok := bridge.usersByJID[userID]
+	user, ok := bridge.UsersByHID[userID]
 	if !ok {
 		dbUser := bridge.DB.User.GetByJID(userID)
 		if dbUser == nil {
@@ -94,7 +94,7 @@ func (bridge *Bridge) GetUserByJID(userID types.WhatsAppID) *User {
 		}
 		user = bridge.NewUser(dbUser)
 		bridge.usersByMXID[user.MXID] = user
-		bridge.usersByJID[user.JID] = user
+		bridge.UsersByHID[user.JID] = user
 		if len(user.ManagementRoom) > 0 {
 			bridge.managementRooms[user.ManagementRoom] = user
 		}
@@ -113,7 +113,7 @@ func (bridge *Bridge) GetAllUsers() []*User {
 			user = bridge.NewUser(dbUser)
 			bridge.usersByMXID[user.MXID] = user
 			if len(user.JID) > 0 {
-				bridge.usersByJID[user.JID] = user
+				bridge.UsersByHID[user.JID] = user
 			}
 			if len(user.ManagementRoom) > 0 {
 				bridge.managementRooms[user.ManagementRoom] = user
@@ -138,7 +138,7 @@ func (bridge *Bridge) NewUser(dbUser *database.User) *User {
 	return user
 }
 
-func (user *User) SetManagementRoom(roomID types.MatrixRoomID) {
+func (user *User) SetManagementRoom(roomID types.MatrixRoomId) {
 	existingUser, ok := user.bridge.managementRooms[roomID]
 	if ok {
 		existingUser.ManagementRoom = ""
@@ -314,7 +314,7 @@ func (user *User) syncPortals(createAll bool) {
 	}
 	now := uint64(time.Now().Unix())
 	for i, chat := range chats {
-		if chat.LastMessageTime + user.bridge.Config.Bridge.SyncChatMaxAge < now {
+		if chat.LastMessageTime+user.bridge.Config.Bridge.SyncChatMaxAge < now {
 			break
 		}
 		create := (chat.LastMessageTime >= user.LastConnection && user.LastConnection > 0) || i < limit

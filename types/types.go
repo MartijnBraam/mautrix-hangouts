@@ -16,17 +16,17 @@
 
 package types
 
-// WhatsAppID is a WhatsApp JID.
-type WhatsAppID = string
+// HangoutsId is a WhatsApp JID.
+type HangoutsId = string
 
-// WhatsAppMessageID is the internal ID of a WhatsApp message.
-type WhatsAppMessageID = string
+// HangoutsMessageId is the internal ID of a WhatsApp message.
+type HangoutsMessageId = string
 
-// MatrixUserID is the ID of a Matrix user.
-type MatrixUserID = string
+// MatrixUserId is the ID of a Matrix user.
+type MatrixUserId = string
 
-// MatrixRoomID is the internal room ID of a Matrix room.
-type MatrixRoomID = string
+// MatrixRoomId is the internal room ID of a Matrix room.
+type MatrixRoomId = string
 
-// MatrixEventID is the internal ID of a Matrix event.
-type MatrixEventID = string
+// MatrixEventId is the internal ID of a Matrix event.
+type MatrixEventId = string

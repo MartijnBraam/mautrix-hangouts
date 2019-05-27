@@ -25,7 +25,7 @@ import (
 
 	log "maunium.net/go/maulogger/v2"
 
-	"maunium.net/go/mautrix-whatsapp/types"
+	"mautrix-hangouts/types"
 )
 
 type MessageQuery struct {
@@ -53,17 +53,17 @@ func (mq *MessageQuery) GetAll(chat PortalKey) (messages []*Message) {
 }
 
 func (mq *MessageQuery) GetByJID(chat PortalKey, jid types.WhatsAppMessageID) *Message {
-	return mq.get("SELECT chat_jid, chat_receiver, jid, mxid, sender, timestamp, content " +
+	return mq.get("SELECT chat_jid, chat_receiver, jid, mxid, sender, timestamp, content "+
 		"FROM message WHERE chat_jid=$1 AND chat_receiver=$2 AND jid=$3", chat.JID, chat.Receiver, jid)
 }
 
 func (mq *MessageQuery) GetByMXID(mxid types.MatrixEventID) *Message {
-	return mq.get("SELECT chat_jid, chat_receiver, jid, mxid, sender, timestamp, content " +
+	return mq.get("SELECT chat_jid, chat_receiver, jid, mxid, sender, timestamp, content "+
 		"FROM message WHERE mxid=$1", mxid)
 }
 
 func (mq *MessageQuery) GetLastInChat(chat PortalKey) *Message {
-	msg := mq.get("SELECT chat_jid, chat_receiver, jid, mxid, sender, timestamp, content " +
+	msg := mq.get("SELECT chat_jid, chat_receiver, jid, mxid, sender, timestamp, content "+
 		"FROM message WHERE chat_jid=$1 AND chat_receiver=$2 ORDER BY timestamp DESC LIMIT 1", chat.JID, chat.Receiver)
 	if msg == nil || msg.Timestamp == 0 {
 		// Old db, we don't know what the last message is.
@@ -128,7 +128,7 @@ func (msg *Message) encodeBinaryContent() []byte {
 }
 
 func (msg *Message) Insert() {
-	_, err := msg.db.Exec("INSERT INTO message (chat_jid, chat_receiver, jid, mxid, sender, timestamp, content) " +
+	_, err := msg.db.Exec("INSERT INTO message (chat_jid, chat_receiver, jid, mxid, sender, timestamp, content) "+
 		"VALUES ($1, $2, $3, $4, $5, $6, $7)",
 		msg.Chat.JID, msg.Chat.Receiver, msg.JID, msg.MXID, msg.Sender, msg.Timestamp, msg.encodeBinaryContent())
 	if err != nil {

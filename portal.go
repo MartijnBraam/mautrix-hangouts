@@ -26,6 +26,7 @@ import (
 	"image/jpeg"
 	"image/png"
 	"math/rand"
+	whatsappExt "mautrix-hangouts/whatsapp-ext"
 	"mime"
 	"net/http"
 	"strings"
@@ -40,9 +41,8 @@ import (
 	"maunium.net/go/mautrix"
 	"maunium.net/go/mautrix-appservice"
 
-	"maunium.net/go/mautrix-whatsapp/database"
-	"maunium.net/go/mautrix-whatsapp/types"
-	"maunium.net/go/mautrix-whatsapp/whatsapp-ext"
+	"mautrix-hangouts/database"
+	"mautrix-hangouts/types"
 )
 
 func (bridge *Bridge) GetPortalByMXID(mxid types.MatrixRoomID) *Portal {
@@ -55,7 +55,7 @@ func (bridge *Bridge) GetPortalByMXID(mxid types.MatrixRoomID) *Portal {
 			return nil
 		}
 		portal = bridge.NewPortal(dbPortal)
-		bridge.portalsByJID[portal.Key] = portal
+		bridge.portalsByHID[portal.Key] = portal
 		if len(portal.MXID) > 0 {
 			bridge.portalsByMXID[portal.MXID] = portal
 		}
@@ -66,7 +66,7 @@ func (bridge *Bridge) GetPortalByMXID(mxid types.MatrixRoomID) *Portal {
 func (bridge *Bridge) GetPortalByJID(key database.PortalKey) *Portal {
 	bridge.portalsLock.Lock()
 	defer bridge.portalsLock.Unlock()
-	portal, ok := bridge.portalsByJID[key]
+	portal, ok := bridge.portalsByHID[key]
 	if !ok {
 		dbPortal := bridge.DB.Portal.GetByJID(key)
 		if dbPortal == nil {
@@ -75,7 +75,7 @@ func (bridge *Bridge) GetPortalByJID(key database.PortalKey) *Portal {
 			dbPortal.Insert()
 		}
 		portal = bridge.NewPortal(dbPortal)
-		bridge.portalsByJID[portal.Key] = portal
+		bridge.portalsByHID[portal.Key] = portal
 		if len(portal.MXID) > 0 {
 			bridge.portalsByMXID[portal.MXID] = portal
 		}
@@ -89,10 +89,10 @@ func (bridge *Bridge) GetAllPortals() []*Portal {
 	dbPortals := bridge.DB.Portal.GetAll()
 	output := make([]*Portal, len(dbPortals))
 	for index, dbPortal := range dbPortals {
-		portal, ok := bridge.portalsByJID[dbPortal.Key]
+		portal, ok := bridge.portalsByHID[dbPortal.Key]
 		if !ok {
 			portal = bridge.NewPortal(dbPortal)
-			bridge.portalsByJID[portal.Key] = portal
+			bridge.portalsByHID[portal.Key] = portal
 			if len(dbPortal.MXID) > 0 {
 				bridge.portalsByMXID[dbPortal.MXID] = portal
 			}
@@ -1176,7 +1176,7 @@ func (portal *Portal) HandleMatrixRedaction(sender *User, evt *mautrix.Event) {
 
 func (portal *Portal) Delete() {
 	portal.Portal.Delete()
-	delete(portal.bridge.portalsByJID, portal.Key)
+	delete(portal.bridge.portalsByHID, portal.Key)
 	if len(portal.MXID) > 0 {
 		delete(portal.bridge.portalsByMXID, portal.MXID)
 	}

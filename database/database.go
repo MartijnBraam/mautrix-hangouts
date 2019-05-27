@@ -24,7 +24,7 @@ import (
 
 	log "maunium.net/go/maulogger/v2"
 
-	"maunium.net/go/mautrix-whatsapp/database/upgrades"
+	"mautrix-hangouts/database/upgrades"
 )
 
 type Database struct {

@@ -23,14 +23,11 @@ import (
 	"maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/format"
 
-	"github.com/Rhymen/go-whatsapp"
-
 	"maunium.net/go/maulogger/v2"
 	"maunium.net/go/mautrix-appservice"
 
-	"maunium.net/go/mautrix-whatsapp/database"
-	"maunium.net/go/mautrix-whatsapp/types"
-	"maunium.net/go/mautrix-whatsapp/whatsapp-ext"
+	"mautrix-hangouts/database"
+	"mautrix-hangouts/types"
 )
 
 type CommandHandler struct {

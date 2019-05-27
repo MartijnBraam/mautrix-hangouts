@@ -22,7 +22,7 @@ import (
 
 	log "maunium.net/go/maulogger/v2"
 
-	"maunium.net/go/mautrix-whatsapp/types"
+	"mautrix-hangouts/types"
 )
 
 type PortalKey struct {
@@ -42,7 +42,7 @@ func NewPortalKey(jid, receiver types.WhatsAppID) PortalKey {
 		receiver = jid
 	}
 	return PortalKey{
-		JID: jid,
+		JID:      jid,
 		Receiver: receiver,
 	}
 }

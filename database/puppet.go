@@ -21,7 +21,7 @@ import (
 
 	log "maunium.net/go/maulogger/v2"
 
-	"maunium.net/go/mautrix-whatsapp/types"
+	"mautrix-hangouts/types"
 )
 
 type PuppetQuery struct {
